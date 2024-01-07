@@ -1,4 +1,4 @@
-const productList = []; 
+const productList = [];
 
 // Function to check if the user is logged in
 async function isLoggedIn() {
@@ -12,7 +12,7 @@ async function isLoggedIn() {
     console.error(error);
     return false;
   }
-  
+
 }
 //popup
 // Function to show the custom popup with a message
@@ -118,6 +118,7 @@ async function addProduct() {
       return;
     }
 
+
     // Check if the user is logged in
     const loggedIn = await isLoggedIn();
 
@@ -127,9 +128,9 @@ async function addProduct() {
     }
 
     // Check if the product already exists in the local list
-   // Check if the product already exists in the local list
-   if (productList.find(item => item.productName === productName && item.storeName === storeName && item.shoptype === shoptype)) {
-      alert('Please enter a valid and unique item.');
+    // Check if the product already exists in the local list
+    if (productList.find(item => item.productName === productName && item.storeName === storeName && item.shoptype === shoptype)) {
+      showPopup('Please enter a valid and unique item.');
       return;
     }
 
@@ -148,18 +149,23 @@ async function addProduct() {
     });
 
     const responseData = await response.json();
-    console.log(responseData.message,"aaa");
+    console.log(responseData.message, "aaa");
 
-  
+
 
     // Refresh the product list after adding
     displayProductList();
+
+
+    // Show the success popup after everything is done
     showPopup('Product added!');
-      // Clear input fields
+
+    // Clear input fields
     document.getElementById('productName').value = '';
     productQuantityInput.value = '';
     document.getElementById('storeName').value = '';
     document.getElementById('shoptype').value = 'online';
+
   } catch (error) {
     console.error(error);
     // Handle error if needed
@@ -328,7 +334,6 @@ async function updateProduct(productId) {
     // Change the button back to Add
     document.getElementById('submitBtn').innerText = 'Add';
     document.getElementById('submitBtn').onclick = addProduct;
-    // Show a success alert
     // Show a success popup
     showPopup('Product list updated successfully!');
   } catch (error) {

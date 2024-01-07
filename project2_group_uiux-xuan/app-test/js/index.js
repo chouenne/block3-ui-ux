@@ -2,24 +2,46 @@
 const productList = [];
 
 // Function to check if the user is logged in
-function isLoggedIn() {
-    return fetch('check_login.php', {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-    .then(data => data.logged_in)
-    .catch(error => {
-        console.error('Fetch error:', error);
+async function isLoggedIn() {
+    try {
+        const response = await fetch('check_login.php');
+        const data = await response.json();
+        // console.log(data, 'response');
+        displayProductList();
+        return data.logged_in;
+    } catch (error) {
+        console.error(error);
         return false;
-    });
+    }
+
+}
+
+function showPopup(message) {
+    const popup = document.getElementById('customPopup');
+    const overlay = document.getElementById('overlay');
+    const popupMessage = document.getElementById('popupMessage');
+
+    // Set the message
+    popupMessage.innerText = message;
+
+    // Display the popup and overlay
+    popup.style.display = 'block';
+    overlay.style.display = 'block';
+
+    // Automatically hide the popup after 3000 milliseconds (adjust the time as needed)
+    setTimeout(function () {
+        hidePopup();
+    }, 800);
+}
+
+// Function to hide the custom popup
+function hidePopup() {
+    const popup = document.getElementById('customPopup');
+    const overlay = document.getElementById('overlay');
+
+    // Hide the popup and overlay
+    popup.style.display = 'none';
+    overlay.style.display = 'none';
 }
 
 
@@ -71,7 +93,7 @@ async function fetchProductList() {
     }
 
     const products = await response.json();
-    
+
     return products;
 }
 
@@ -90,7 +112,7 @@ async function displayProductList() {
         // Fetch the product list
         const products = await fetchProductList();
         console.log('Products:', products);
-        
+
         // Update the product list in the HTML
         updateProductList(products);
     } catch (error) {
@@ -118,13 +140,13 @@ async function addProduct() {
         var shoptype = document.getElementById("shoptype").value;
 
         if (!productName || isNaN(productQuantity) || productQuantity <= 0) {
-            alert('Please fill in the required fields with valid values.');
+            showPopup('Please fill in the required fields with valid values.');
             return;
         }
 
         // Check if the product already exists in the local list
         if (productList.find(item => item.productName === productName && item.storeName === storeName && item.shoptype === shoptype)) {
-            alert('This data already exists in the list.');
+            showPopup('This data already exists in the list.');
             return;
         }
 
@@ -153,21 +175,27 @@ async function addProduct() {
         const products = await fetchProductList();
         updateProductList(products);
 
+
         // Clear input fields
         document.getElementById("productName").value = '';
         productQuantityInput.value = '';
         document.getElementById("storeName").value = '';
         document.getElementById("shoptype").value = 'online';
+        console.log('Before showPopup'); // Add this line
+        // Show the success popup after everything is done
+        showPopup('Product added!');
+        console.log('After showPopup'); // Add this line
+
     } catch (error) {
         console.error('Error adding product:', error);
     }
 }
 
-            
+
 // Function to delete a product
 async function deleteProduct(productId) {
     console.log(productId, "productId");
-      const confirmDelete = confirm('Are you sure you want to delete this product?');
+    const confirmDelete = confirm('Are you sure you want to delete this product?');
 
     if (!confirmDelete) {
         return; // If the user cancels the deletion, do nothing
@@ -193,8 +221,9 @@ async function deleteProduct(productId) {
         }
 
         const responseData = await response.json();
-        console.log(responseData.message,"aaa");
+        console.log(responseData.message, "aaa");
         displayProductList(); // Refresh the product list after deletion
+        showPopup('Product list delete successfully!');
     } catch (error) {
         console.error(error);
         // Handle error if needed
@@ -204,23 +233,23 @@ async function deleteProduct(productId) {
 
 async function editProduct(productId) {
     //  console.log(productId,"productId111")
-        try {
-            // Fetch current product details
-            const productDetailsResponse = await fetch(`select.php?productId=${productId}`, {
+    try {
+        // Fetch current product details
+        const productDetailsResponse = await fetch(`select.php?productId=${productId}`, {
             method: 'GET', // Make sure to explicitly specify the method
-            });
+        });
 
-            const productDetails = await productDetailsResponse.json();
-            // console.log('Product Details:', productDetails);
+        const productDetails = await productDetailsResponse.json();
+        // console.log('Product Details:', productDetails);
 
-            if (
+        if (
             productDetails &&
             productDetails.length > 0 &&
             productDetails[0].productName !== undefined &&
             productDetails[0].productQuantity !== undefined &&
             productDetails[0].storeName !== undefined &&
             productDetails[0].shoptype !== undefined
-            ) {
+        ) {
             // Populate the form with current product details
             document.getElementById('productName').value = productDetails[0].productName;
             document.getElementById('productQuantity').value = productDetails[0].productQuantity;
@@ -232,93 +261,85 @@ async function editProduct(productId) {
             document.getElementById('submitBtn').onclick = function () {
                 updateProduct(productId);
             };
-            } else {
-            alert('Error: Unable to load product details.');
+        } else {
             console.error('Incomplete or missing product details.');
-            }
-        } catch (error) {
-            console.error(error);
-            // Handle error if needed
         }
+    } catch (error) {
+        console.error(error);
+        // Handle error if needed
+    }
 }
 
 
 
 // Function to update an existing product
 async function updateProduct(productId) {
-    console.log(productId,"productId")
-  try {
-    // Get updated data from the form
-    const updatedData = {
-      productName: document.getElementById('productName').value,
-      productQuantity: document.getElementById('productQuantity').value,
-      storeName: document.getElementById('storeName').value,
-      shoptype: document.getElementById('shoptype').value,
-    };
+    console.log(productId, "productId")
+    try {
+        // Get updated data from the form
+        const updatedData = {
+            productName: document.getElementById('productName').value,
+            productQuantity: document.getElementById('productQuantity').value,
+            storeName: document.getElementById('storeName').value,
+            shoptype: document.getElementById('shoptype').value,
+        };
 
-//     // Make a fetch request to update the product
-    const response = await fetch('update.php', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        productId: productId,
-        updatedData: updatedData,
-      }),
-    });
+        //     // Make a fetch request to update the product
+        const response = await fetch('update.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                productId: productId,
+                updatedData: updatedData,
+            }),
+        });
 
-    const responseData = await response.json();
-    console.log(responseData.message);
+        const responseData = await response.json();
+        console.log(responseData.message);
 
-    // Refresh the product list after updating
-    displayProductList();
+        // Refresh the product list after updating
+        displayProductList();
 
-    // Clear form fields
-    document.getElementById('productName').value = '';
-    document.getElementById('productQuantity').value = '';
-    document.getElementById('storeName').value = '';
-    document.getElementById('shoptype').value = '';
+        // Clear form fields
+        document.getElementById('productName').value = '';
+        document.getElementById('productQuantity').value = '';
+        document.getElementById('storeName').value = '';
+        document.getElementById('shoptype').value = '';
 
-    // Change the button back to Add
-    document.getElementById('submitBtn').innerText = 'Add';
-    document.getElementById('submitBtn').onclick = addProduct;
-    // Show a success alert
-    // Show a success popup
-    alert('Product list updated successfully!');
-  } catch (error) {
-    console.error(error);
-    // Handle error if needed
-  }
+        // Change the button back to Add
+        document.getElementById('submitBtn').innerText = 'Add';
+        document.getElementById('submitBtn').onclick = addProduct;
+        // Show a success alert
+        // Show a success popup
+        showPopup('Product list updated successfully!');
+    } catch (error) {
+        console.error(error);
+        // Handle error if needed
+    }
 }
-  
+
 
 //mark completed
 async function markProduct(productId) {
-    console.log(productId,"productId")//可以拿到ID
-  try {
-    // Check if the user is logged in
-    const loggedIn = await isLoggedIn();
+    // console.log(productId, "productId")
+    try {
+        // Check if the user is logged in
+        const loggedIn = await isLoggedIn();
 
-    if (!loggedIn) {
-      window.location.href = 'login.php'; // Redirect to login page if not logged in
-      return;
-    }
+        if (!loggedIn) {
+            window.location.href = 'login.php'; // Redirect to login page if not logged in
+            return;
+        }
 
-      const listItem = document.getElementById(`product_${productId}`);
-      console.log(listItem,"listItem")
-
-    
-    if (listItem) {
+        const listItem = document.getElementById(`product_${productId}`);
         listItem.classList.toggle('completed');
-         alert('Product marked as completed!');
-    } else {
-      console.error(`Element with ID 'product_${productId}' not found.`);
+
+    } catch (error) {
+        console.error(error);
+        // Handle error if needed
     }
-  } catch (error) {
-    console.error(error);
-//     // Handle error if needed
-   }
 }
 
 // Attach the displayProductList function to an event (e.g., page load)

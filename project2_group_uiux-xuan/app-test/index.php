@@ -46,26 +46,27 @@
 
                 <h1>Quick Reminder</h1>
                 <h2>your shopping list for next time</h2>
-            <div>
-                <form id="productForm">
-                    
-                    <!-- <label for="productName">Product Name:</label> -->
-                    <input type="text" id="productName" name="productName" placeholder="What to buy?" required>
+                <div>
+                    <form id="productForm">
 
-                    <!-- <label for="productQuantity">Product Quantity:</label> -->
-                    <input type="number" id="productQuantity" name="productQuantity" placeholder="Numbers to buy?">
+                        <!-- <label for="productName">Product Name:</label> -->
+                        <input type="text" id="productName" name="productName" placeholder="What to buy?" required>
 
-                    <!-- <label for="storeName">Store Name:</label> -->
-                    <input type="text" id="storeName" name="storeName" placeholder="Where to buy?">
+                        <!-- <label for="productQuantity">Product Quantity:</label> -->
+                        <input type="number" id="productQuantity" name="productQuantity" placeholder="Numbers to buy?"
+                            min="1">
 
-                    <!-- <label for="shoptype">Shop Type:</label> -->
-                    <select id="shoptype" name="shoptype">
-                        <option value="online">Online Shopping</option>
-                        <option value="offline">Offline Shopping</option>
-                    </select>
+                        <!-- <label for="storeName">Store Name:</label> -->
+                        <input type="text" id="storeName" name="storeName" placeholder="Where to buy?">
 
-                    <button type="button" id="submitBtn" onclick="addProduct()">Add</button>
-                </form>
+                        <!-- <label for="shoptype">Shop Type:</label> -->
+                        <select id="shoptype" name="shoptype">
+                            <option value="online">Online Shopping</option>
+                            <option value="offline">Offline Shopping</option>
+                        </select>
+
+                        <button type="button" id="submitBtn" onclick="addProduct()">Add</button>
+                    </form>
 
         </section>
 
